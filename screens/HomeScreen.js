@@ -1,6 +1,6 @@
 import {Text,View,StatusBar,Pressable,Image,FlatList,
 	Modal,TouchableOpacity,ActivityIndicator,TextInput,
-	StyleSheet,ScrollView,PermissionsAndroid} from 'react-native';
+	StyleSheet,ScrollView,PermissionsAndroid,Alert} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon2 from 'react-native-vector-icons/MaterialIcons';
 import Icon3 from 'react-native-vector-icons/FontAwesome6';
@@ -10,14 +10,19 @@ import Icon5 from 'react-native-vector-icons/Octicons';
 import LinearGradient from 'react-native-linear-gradient';
 import Navbar from '../components/Navbar';
 import PublicSpaceCardHome from '../components/PublicSpaceCardHome';
+import YoutubeTrendingSongsComponents from '../components/YoutubeTrendingSongsComponents';
 import {useState,useEffect} from 'react';
 import axios from 'axios';
 import {useRecoilState} from 'recoil';
-import {currentUserState,currentSpaceState,currentSongInfoState} from '../atoms/userAtom';
+import {currentUserState,currentSpaceState,currentSongInfoState,
+searchResultState,searchResult2State,tempNavigationState} from '../atoms/userAtom';
 import { getAll, getAlbums, searchSongs, SortSongFields, SortSongOrder } from "react-native-get-music-files";
-import {getAllPublicSpace,createSpace} from '../utils/ApiRoutes';
+import {getAllPublicSpace,createSpace,updateInSpace,fetchCurrentUserSpaces,
+	getSpaceWithCode} from '../utils/ApiRoutes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import LocalSongs from '../components/LocalSongs';
 import TrackPlayer, { Capability, State } from 'react-native-track-player';
+import {socket} from '../services/socket';
 
 const particleImage2 = {uri:'data:image/png;base64,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'}
 const particleImage3 = {uri:'data:image/png;base64,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'}
@@ -31,8 +36,10 @@ export default function HomeScreen({
 	const [currentUser,setCurrentUser] = useRecoilState(currentUserState);
 	const [currentSpace,setCurrentSpace] = useRecoilState(currentSpaceState);
 	const [currentSongInfo,setCurrentSongInfo] = useRecoilState(currentSongInfoState);
-	const [searchResult,setSearchResult] = useState([]);
-	const [searchResult2,setSearchResult2] = useState([]);
+	const [searchResult,setSearchResult] = useRecoilState(searchResultState);
+	const [searchResult2,setSearchResult2] = useRecoilState(searchResult2State);
+	const [tempNavigation,setTempNavigation] = useRecoilState(tempNavigationState);
+	const [currentUserSpace,setCurrentUserSpace] = useState([]);
 	const [joinWithCodeOpen, setJoinWithCodeOpen] = useState(false);
 	const [showInfoBox,setShowInfoBox] = useState(false);
 	const [newSpaceCreateOpen,setNewSpaceCreateOpen] = useState(false);
@@ -42,6 +49,17 @@ export default function HomeScreen({
 	const [localSongs,setLocalSongs] = useState([]);
 	const [loading,setLoading] = useState(false)
 	const [code,setCode] = useState('');
+	const [openLocalSongs,setOpenLocalSongs] = useState(false);
+
+	useEffect(()=>{
+		if(navigation){
+			setTempNavigation(navigation);
+		}
+	},[navigation])
+
+	const saveCurrentSpaceInLocal = async(data) => {
+		await AsyncStorage.setItem("Rplayer-currentSpace",JSON.stringify(data));
+	}
 
 	function generateRandomId(length) {
 	  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -67,6 +85,7 @@ export default function HomeScreen({
 			const users = [userData];
 			const {data} = await axios.post(createSpace,{
 				ownerImage:currentUser.image,
+				ownerId:currentUser?._id,
 				isPrivate:!creatingPublicSpace,
 				owner:currentUser.name,
 				spaceName:spaceName,
@@ -74,13 +93,23 @@ export default function HomeScreen({
 				users
 			})
 			if(data.status){
-				setCurrentSpace(data?.space);
-				navigation.navigate("Space");
+				const data2 = await axios.post(`${updateInSpace}/${currentUser?._id}`,{
+					spaceCode:data?.space?.code
+				})
+				if(data2?.data?.status){
+					setCurrentUser(data2?.data?.user);
+					setCurrentSpace(data?.space);
+					saveCurrentSpaceInLocal(data?.space);
+					navigation.navigate("Space");
+				}
 				// setLoading(true);
 				// router.push(`/space/${data?.space?.code}`);
 			}else{
 				setLoading(false);
 			}
+		}else{
+			if(currentSpace)
+			Alert.alert("Leave the current space");
 		}
 	}
 
@@ -137,7 +166,7 @@ export default function HomeScreen({
 			fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=Trending+songs+in+tamil&type=video&key=AIzaSyBsSNS3pb_SShB5fFEY3A2ufErYKe-X0VI')
 			.then(res=>res.json())
 			.then(res=>{
-				// console.log(res)
+				console.log(res)
 				handleTrendingResponse(res);
 			}).catch(err=>{
 				console.log(err)
@@ -160,8 +189,7 @@ export default function HomeScreen({
 
 	const fetchSpaces = async() => {
 		const {data} = await axios.get(getAllPublicSpace);
-		setSpaceList([...data.space,...data.space,...data.space,...data.space,]);
-		// console.log(data.space)
+		setSpaceList(data.space);
 	}
 
 	const getSongs = async() => {
@@ -169,10 +197,10 @@ export default function HomeScreen({
 		    const granted = await PermissionsAndroid.request(
 		      PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
 		      {
-		        title: 'Cool Photo App Camera Permission',
+		        title: 'Audio Files Read Permission',
 		        message:
-		          'Cool Photo App needs access to your camera ' +
-		          'so you can take awesome pictures.',
+		          'Audio Files Read Permission Required ' +
+		          'to Play Songs From Local',
 		        buttonNeutral: 'Ask Me Later',
 		        buttonNegative: 'Cancel',
 		        buttonPositive: 'OK',
@@ -182,46 +210,152 @@ export default function HomeScreen({
 		    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
 		      console.log('You can view the audio files');
 		    } else {
-		      console.warn('Camera permission denied');
+		      console.log('Media Files Permission Denied');
 		    }
-		  } catch (err) {
+		} catch (err) {
 		    console.warn(err);
-		  }
+		}
+		
 		const songsOrError = await getAll({
 		    limit: 20,
 		    offset: 0,
-		    coverQuality: 50,
+		    coverQuality: 30,
 		    minSongDuration: 1000,
 		    sortBy: SortSongFields.TITLE,
 		    sortOrder: SortSongOrder.DESC,
 		});
-		setLocalSongs(songsOrError)
+		if(localSongs.length<1){
+			setLocalSongs(songsOrError)
+		}
 	}
 
+	const playSongFromLocal = async(item) => {
+		try{
+            await TrackPlayer.setupPlayer();
+        }catch(ex){
+            console.log(ex)
+        }
+        await TrackPlayer.updateOptions({
+            // Media controls capabilities
+            capabilities: [
+                Capability.Play,
+                Capability.Pause,
+                Capability.SkipToNext,
+                Capability.SkipToPrevious,
+                Capability.Stop,
+            ],
+
+            // Capabilities that will show up when the notification is in the compact form on Android
+            compactCapabilities: [Capability.Play, Capability.Pause,Capability.SkipToNext,
+               Capability.SkipToPrevious,],
+
+        });
+        await TrackPlayer.reset();
+        
+        const track1 = {
+            url: item?.url,
+            title: item?.title,
+            artist: item?.artist,
+            album: item?.album,
+            duration: item?.duration,
+            id: item?.url,
+            code: item?.url,
+            cover: item?.cover
+        };
+        setCurrentSongInfo(track1);
+        await TrackPlayer.add(track1);
+
+        await TrackPlayer.play();
+	};
+
+	const fetchSpaceWithCodeAndJoin = async() => {
+		setLoading(true);
+		const {data} = await axios.get(`${getSpaceWithCode}/${code}`);
+		if(data?.status){
+			setCurrentSpace(data?.space);
+			saveCurrentSpaceInLocal(data?.space);
+			setJoinWithCodeOpen(false);
+
+			if(currentUser?.inSpace !== data?.space?.code){
+				const data2 = await axios.post(`${updateInSpace}/${currentUser?._id}`,{
+					spaceCode:data?.space?.code
+				})
+				if(data2?.data?.status){
+					setCurrentUser(data2?.data?.user);
+					setLoading(false)
+					await TrackPlayer.pause();
+					await TrackPlayer.reset();
+					setCurrentSongInfo("");
+					navigation.navigate("Space");
+				}else{
+					setLoading(false);
+					setShowInfoBox("Something went wrong!");
+					setTimeout(()=>{
+						setShowInfoBox('');
+					},4000)
+				}
+			}else{
+				setLoading(false);
+				navigation.navigate("Space");
+			}
+		}else{
+			setLoading(false);
+			setShowInfoBox(true);
+			setJoinWithCodeOpen(false);
+		}
+
+	}
+
+	const fetchCurrentUserSpacesFunc = async() => {
+		const {data} = await axios.post(fetchCurrentUserSpaces,{
+			id:currentUser?._id
+		});
+		if(data?.status){
+			setCurrentUserSpace(data?.space);
+		}
+	}
+
+	const checkUserDataInLocal = async() => {
+		const data = await AsyncStorage.getItem("Rplayer-user-session");
+		if(!data) navigation.navigate("Login");
+	}
+	
+	useEffect(()=>{
+		if(currentUser){
+			fetchCurrentUserSpacesFunc();
+		}else{
+			checkUserDataInLocal();
+		}
+	},[currentUser])
 
 	useEffect(()=>{
-		// fetchTrending();
+		fetchTrending();
 		fetchSpaces();
 	},[]);
 
+
 	return (
 
-		<LinearGradient 
-		colors={['#000060', '#000020', '#410752']}
-        style={{
-		    flex: 1,
-		  }}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        className="flex-1 z-10 flex w-full relative" 
-        >
+	<LinearGradient 
+	colors={['#000060', '#000020', '#410752']}
+    style={{
+	    flex: 1,
+	  }}
+    start={{ x: 0.5, y: 0 }}
+    end={{ x: 0.5, y: 1 }}
+    className="flex-1 z-10 flex w-full relative" 
+    >
         <Navbar navigation={navigation} />
     	<Image source={{uri:particleImage3.uri,height:5,width:5}}
 		className="absolute top-[200px] right-0 z-0 h-[100px] w-[100px]"/>
 		<Image source={{uri:particleImage2.uri,height:5,width:5}}
 		className="absolute top-[500px] left-[10%] z-0 h-[100px] w-[100px]"/>
+		<LocalSongs openLocalSongs={openLocalSongs} setOpenLocalSongs={setOpenLocalSongs}
+		localSongs={localSongs} musicImage={musicImage} TrackPlayer={TrackPlayer}
+		Capability={Capability} State={State} currentSongInfo={currentSongInfo}
+		setCurrentSongInfo={setCurrentSongInfo}
+		/>
 		<ScrollView showsVerticalScrollIndicator={false} style={{flex:1}} >
-
 			<Modal
 	        animationType="fade"
 	        transparent={true}
@@ -263,8 +397,7 @@ export default function HomeScreen({
 						className="text-white w-[90%] border-[1px] border-gray-500 w-full px-3 text-center text-[17px] rounded-lg h-[50px]" />
 						<TouchableOpacity onPress={()=>{
 							if(code?.length > 0){
-								setShowInfoBox(true);
-								setJoinWithCodeOpen(false);
+								if(!loading) fetchSpaceWithCodeAndJoin();
 							}
 						}} >
 							<View className="px-4 pt-3">
@@ -330,7 +463,7 @@ export default function HomeScreen({
 								</View>
 							</TouchableOpacity>
 							<TouchableOpacity onPress={()=>{
-								createSpaceFunc();
+								if(!loading) createSpaceFunc();
 							}} className="w-[48%]">
 								<LinearGradient colors={['#aa55f4', '#cc4ec4', '#e9489d']}
 						        useAngle={true} angle={90} 
@@ -357,12 +490,12 @@ export default function HomeScreen({
 				<View className="flex flex-row px-4 justify-between">
 					<Text style={{fontFamily:"Poppins-SemiBold"}} 
 					className="text-xl font-semibold text-white">
-						Hi Thejas!
+						Hi {currentUser?.name}!
 					</Text>
-					<Pressable 
+					<Pressable onPress={()=>navigation.navigate("Settings")}
 					style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0 }]}
 					>
-					<Icon2 name="settings" size={28} color="white"/>
+						<Icon2 name="settings" size={28} color="white"/>
 					</Pressable>
 				</View>
 
@@ -385,24 +518,44 @@ export default function HomeScreen({
 				        >
 					        <Text style={{fontFamily:"Poppins-Medium"}} 
 						    className="text-lg font-semibold mx-auto text-white" >
-						    	Join With Code
+						    	Enter Code
 						    </Text>
 					    </View>
 					</TouchableOpacity>
 				</View>
 
-				<View className="mt-5">
-					<View className="flex mb-3 flex-row w-full px-4 pr-6 justify-between">
-						<Text style={{fontFamily:'Poppins-SemiBold'}} 
-						className="text-white text-lg">Public Spaces</Text>
-				        <TouchableOpacity onPress={()=>{
-				        	navigation.navigate('PublicSpace')
-				        }}>
+				{
+					currentSpace &&
+					<TouchableOpacity onPress={()=>navigation.navigate("Space")}>
+					<View className="w-full py-2 flex flex-row px-4 items-center justify-between">
+						<Text className="text-white text-lg" >
+							Go to {currentSpace?.spaceName}
+						</Text>
+						<LinearGradient 
+						colors={['#9C3FE4','#C65647']}
+						useAngle={true} angle={90} 
+				        className="px-2 py-2 rounded-full" 
+				        >
 				        	<Icon3 name="arrow-right" size={26} color="white"/>
-						</TouchableOpacity>
+
+						</LinearGradient>
 					</View>
+					</TouchableOpacity>
+				}
+
+				<View className="mt-5">
+					<TouchableOpacity onPress={()=>{
+			        	navigation.navigate('PublicSpace')
+			        }}>
+						<View className="flex mb-3 flex-row w-full px-4 pr-6 justify-between">
+							<Text style={{fontFamily:'Poppins-SemiBold'}} 
+							className="text-white text-lg">Public Spaces</Text>
+					        
+					        	<Icon3 name="arrow-right" size={26} color="white"/>
+						</View>
+					</TouchableOpacity>
 					<FlatList data={spaceList}
-					keyExtracter={item => item?._id}
+					keyExtractor={(item, index) => String(index)}
 					horizontal={true}
 					renderItem={({item,index})=>(
 						<PublicSpaceCardHome View={View} Text={Text} Image={Image} item={item} index={index} 
@@ -411,66 +564,67 @@ export default function HomeScreen({
 						TrackPlayer={TrackPlayer} setCurrentSongInfo={setCurrentSongInfo}
 						/>
 					)}/>
+					{
+						currentUserSpace.length > 0 &&
+						<View className="flex mb-3 flex-row w-full px-4 pr-6 mt-5 justify-between">
+							<Text style={{fontFamily:'Poppins-SemiBold'}} 
+							className="text-white text-lg">My Spaces</Text>
+						</View>
+					}
+					<FlatList data={currentUserSpace}
+					keyExtractor={(item, index) => String(index)}
+					horizontal={true}
+					renderItem={({item,index})=>(
+						<PublicSpaceCardHome View={View} Text={Text} Image={Image} item={item} index={index} 
+						musicImage={musicImage} Icon3={Icon3} Pressable={Pressable} navigation={navigation} setCurrentSpace={setCurrentSpace}
+						LinearGradient={LinearGradient} ActivityIndicator={ActivityIndicator} currentSpace={currentSpace} 
+						TrackPlayer={TrackPlayer} setCurrentSongInfo={setCurrentSongInfo} mine="true"
+						/>
+					)}/>
 
 
 
 					<Text style={{fontFamily:'Poppins-SemiBold'}} 
 					className="text-white text-lg mt-5 mb-4 px-4">Top Trending Songs</Text>
 					<FlatList data={searchResult}
-					keyExtracter={item => item?.etag}
+					keyExtractor={(item, index) => String(index)}
 					horizontal={true}
 					renderItem={({item,index})=>(
-						<View style={{
-							width:250
-						}} 
-						className={`rounded-lg ml-4 aspect-[16/9] border-[1px] border-solid 
-						border-gray-200/60 overflow-hidden `}>
-							<Image 
-							src={item?.snippet?.thumbnails?.medium?.url}
-							style={{
-								width:'100%',
-								resizeMode:'contain'
-							}} className="aspect-[16/9]"
-							/>
-						</View>
+						<YoutubeTrendingSongsComponents item={item} index={index} key={index}
+						View={View} Image={Image} ActivityIndicator={ActivityIndicator} 
+						Pressable={Pressable} socket={socket}
+						/>
 					)}/>
 					<View className="w-full my-3"/>
 					<FlatList data={searchResult2}
-					keyExtracter={item => item?.etag}
+					keyExtractor={(item, index) => String(index)}
 					horizontal={true}
 					renderItem={({item,index})=>(
-						<View style={{
-							width:250
-						}} 
-						className={`rounded-lg ml-4 aspect-[16/9] border-[1px] border-solid 
-						border-gray-200/60 overflow-hidden `}>
-							<Image 
-							src={item?.snippet?.thumbnails?.medium?.url}
-							style={{
-								width:'100%',
-								resizeMode:'contain'
-							}} className="aspect-[16/9]"
-							/>
-						</View>
+						<YoutubeTrendingSongsComponents item={item} index={index} key={index}
+						View={View} Image={Image} ActivityIndicator={ActivityIndicator} 
+						Pressable={Pressable} socket={socket}
+						/>
 					)}/>
 
 					<Text style={{fontFamily:'Poppins-SemiBold'}} 
 					className="text-white text-lg mt-5 mb-4 px-4">Your Songs</Text>
 					<FlatList
-					keyExtracter={item => item?.etag}
+					data={currentUser?.favSong}
+					keyExtractor={(item, index) => String(index)}
 					horizontal={true}
 					ListFooterComponent={()=>(
 						<View className="flex ml-4">
 							<TouchableOpacity onPress={()=>{
-								getSongs()
+								getSongs();
+								setOpenLocalSongs(true);
 							}} >
 								<View style={{
-									width:150,
+									width:130,
 									borderStyle:"dashed",
 									borderRadius: 1,
 									borderWidth: 1
 								}} className="rounded-lg aspect-square 
-								border-gray-200/60 flex items-center justify-center overflow-hidden" >
+								border-gray-200/60 flex mr-4 items-center justify-center overflow-hidden" >
 									<Icon5 name="plus-circle" color="white"
 									size={36}/>
 									<Text className="text-lg mt-2 text-gray-400">
@@ -481,17 +635,23 @@ export default function HomeScreen({
 						</View>
 					)}
 					renderItem={({item,index})=>(
-						<View className="flex ml-4">
-							<View style={{
-								width:150
-							}} className="rounded-lg aspect-square  border-[1px] border-solid 
-							border-gray-200/60 overflow-hidden" >
-
+						<Pressable onPress={()=>{
+							if(!currentSpace) playSongFromLocal(item);
+						}}>
+							<View className={`flex ml-4 ${(currentSpace) && 'opacity-[0.5]'} w-[130px]`}>
+								<View style={{
+									width:130
+								}} className="rounded-lg aspect-square  border-[1px] border-solid 
+								border-gray-200/60 overflow-hidden">
+									<Image source={{uri:item?.cover || musicImage?.uri,height:5,width:5}}
+									className="h-full w-full"
+									/>
+								</View>
+								<Text numberOfLines={3} className="text-[14px] text-center mt-2 text-gray-400">
+									{item?.title}
+								</Text>
 							</View>
-							<Text className="text-[16px] text-center mt-2 text-gray-400">
-								Katchi sera
-							</Text>
-						</View>
+						</Pressable>
 					)}/>
 
 					<View className="my-10"/>
@@ -501,7 +661,7 @@ export default function HomeScreen({
 			</SafeAreaView>
 
 		</ScrollView>
-		</LinearGradient>
+	</LinearGradient>
 	)
 }
 

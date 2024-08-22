@@ -32,7 +32,7 @@ export default function Navbar({
 			 <Icon2 name="people-alt" size={26} color="white" />
 			</TouchableOpacity>
 			<TouchableOpacity onPress={()=>{
-				navigation.navigate('Setting')
+				navigation.navigate('Settings')
 			}} >
 			 <Icon4 name="settings" size={25} color="white" />
 			</TouchableOpacity>

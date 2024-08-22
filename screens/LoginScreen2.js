@@ -4,7 +4,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon2 from 'react-native-vector-icons/Fontisto';
 import Icon3 from 'react-native-vector-icons/FontAwesome';
-import {useState} from 'react';
+import {useState,useEffect} from 'react';
 import {registerRoute,login} from '../utils/ApiRoutes';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -33,6 +33,55 @@ export default function LoginScreen2({
 	const [showInfoBox,setShowInfoBox] = useState('');
 	const [currentUser,setCurrentUser] = useRecoilState(currentUserState);
 	const [loading,setLoading] = useState(false);
+	const [showFeatureNotAvailable,setShowFeatureNotAvailable] = useState(false);
+
+	const fetchData = async() => {
+		console.log("ran")
+		const data = await AsyncStorage.getItem("Rplayer-user-session");
+		const passData = await AsyncStorage.getItem("Rplayer-user-password");
+		const parsed = JSON.parse(data);
+		const passParsed = JSON.parse(passData);
+
+		if(parsed && passParsed){
+			loginWithSessionData(parsed.email,passParsed.password);
+		}
+		console.log(parsed)
+	}
+
+	const loginWithSessionData = async(email,password) => {
+		if (/@gmail\.com$/.test(email)){
+			setLoading(true);
+			const {data} = await axios.post(login,{
+				email,password
+			})
+			if(data.status){
+				const userDataForSession = {
+					email,
+					password
+				}
+				await AsyncStorage.setItem("Rplayer-user-session",JSON.stringify(data?.user))
+				await AsyncStorage.setItem("Rplayer-user-password",JSON.stringify({password:password}));
+				setCurrentUser(data?.user);
+				navigation.navigate("Home");
+				setLoading(false);
+			}else{
+				setLoading(false);
+				// console.log(data)
+				setShowInfoBox(true);
+				setTimeout(()=>{setShowInfoBox(false)},4000)
+			}
+		}else{
+			setLoading(false)
+			setEmailInvalid(true);
+			setTimeout(()=>{
+				setEmailInvalid(false);					
+			},4000)
+		}
+	}
+
+	useEffect(()=>{
+		fetchData()
+	},[])
 
 	const loginNow = async() => {
 		if(register){
@@ -47,10 +96,11 @@ export default function LoginScreen2({
 				})
 				if(data?.status){
 					const userDataForSession = {
-						email:data?.user?.email,
+						email,
 						password
 					}
-					await AsyncStorage.setItem("Rplayer-user-session",JSON.stringify(userDataForSession))
+					await AsyncStorage.setItem("Rplayer-user-session",JSON.stringify(data?.user));
+					await AsyncStorage.setItem("Rplayer-user-password",JSON.stringify({password:password}));
 					setCurrentUser(data?.user);
 					setLoading(false);
 					navigation.navigate("Home")
@@ -75,10 +125,11 @@ export default function LoginScreen2({
 				})
 				if(data.status){
 					const userDataForSession = {
-						email:data?.user?.email,
+						email,
 						password
 					}
-					await AsyncStorage.setItem("Rplayer-user-session",JSON.stringify(userDataForSession))
+					await AsyncStorage.setItem("Rplayer-user-session",JSON.stringify(data?.user));
+					await AsyncStorage.setItem("Rplayer-user-password",JSON.stringify({password:password}));
 					setCurrentUser(data?.user);
 					navigation.navigate("Home");
 					setLoading(false);
@@ -98,8 +149,22 @@ export default function LoginScreen2({
 		}
 	}
 
+	const featureNotAvailable = () => {
+		setShowFeatureNotAvailable(true);
+		setTimeout(()=>{
+			setShowFeatureNotAvailable(false);
+		},2000)
+	}
+
 	return (
 		<View className="h-full w-full relative bg-gray-900 justify-end" >
+			<View className={`absolute z-50 flex ${showFeatureNotAvailable ? 'bottom-5' : '-bottom-[100%]'} items-center justify-center w-full`}>
+				<View className="px-4 bg-black/60 py-2 rounded-lg">
+					<Text className="text-[15px]" >
+						Feature Currently Not Available
+					</Text>
+				</View>
+			</View>	
 			<StatusBar backgroundColor="rgba(0,0,0,0.2)" translucent={true}
 			animated={true} barStyle='light-content' />
 			<Modal
@@ -299,7 +364,7 @@ export default function LoginScreen2({
 
 				        </View>
 
-				        <Pressable style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0 }]} >
+				        <Pressable onPress={()=>featureNotAvailable()} style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0 }]} >
 					        <LinearGradient colors={['rgba(229,231,235,0.2)','rgba(229,231,235,0.05)']}
 					        useAngle={true} angle={90}
 					        className="w-full flex flex-row px-4 py-2 border-[1px] border-solid 

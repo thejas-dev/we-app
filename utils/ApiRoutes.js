@@ -1,4 +1,4 @@
-const host = "http://192.168.1.9:3333"
+export const host = "http://192.168.1.6:3333"
 
 
 export const registerRoute = `${host}/api/auth/register`;
@@ -9,3 +9,10 @@ export const getAllPublicSpace = `${host}/api/auth/getAllPublicSpace`;
 export const updateInSpace = `${host}/api/auth/updateInSpace`;
 export const updateUsersInSpace = `${host}/api/auth/updateUsersInSpace`;
 export const getUserById = `${host}/api/auth/getUserById`;
+export const getAudio = `${host}/getAudio`;
+export const getUsersById = `${host}/api/auth/getUsersById`;
+export const getQueueOfSpace = `${host}/getQueueOfSpace`;
+export const updateFavSong = `${host}/api/auth/updateFavSong`;
+export const fetchCurrentUserSpaces = `${host}/api/auth/fetchCurrentUserSpaces`;
+export const updateUserName = `${host}/api/auth/updateUserName`;
+export const profileImageUploadUrl = `${host}/uploadProfile`;
