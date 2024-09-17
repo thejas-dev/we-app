@@ -20,6 +20,12 @@ export default function YoutubeTrendingSongsComponents({
   	const [youtubePlayer,setYoutubePlayer] = useRecoilState(youtubePlayerState);
 	const [currentSpace,setCurrentSpace] = useRecoilState(currentSpaceState);
 
+    useEffect(()=>{
+        if(currentSongInfo?.videoId === item?.id?.videoId){
+            animateBars();
+        }
+    },[currentSongInfo?.videoId])
+
 	const playSong = async() => {
         console.log("called");
         setLoading(true);
@@ -72,56 +78,56 @@ export default function YoutubeTrendingSongsComponents({
         };
     }
 
-    useEffect(() => {
-	    const animateBars = () => {
-	      Animated.loop(
-	        Animated.sequence([
-	          Animated.parallel([
-	            Animated.timing(bar1Height, {
-	              toValue: 25,
-	              duration: 500,
-	              easing: Easing.linear,
-	              useNativeDriver: false,
-	            }),
-	            Animated.timing(bar2Height, {
-	              toValue: 50,
-	              duration: 500,
-	              easing: Easing.linear,
-	              useNativeDriver: false,
-	            }),
-	            Animated.timing(bar3Height, {
-	              toValue: 25,
-	              duration: 500,
-	              easing: Easing.linear,
-	              useNativeDriver: false,
-	            }),
-	          ]),
-	          Animated.parallel([
-	            Animated.timing(bar1Height, {
-	              toValue: 50,
-	              duration: 500,
-	              easing: Easing.linear,
-	              useNativeDriver: false,
-	            }),
-	            Animated.timing(bar2Height, {
-	              toValue: 25,
-	              duration: 500,
-	              easing: Easing.linear,
-	              useNativeDriver: false,
-	            }),
-	            Animated.timing(bar3Height, {
-	              toValue: 50,
-	              duration: 500,
-	              easing: Easing.linear,
-	              useNativeDriver: false,
-	            }),
-	          ]),
-	        ])
-	      ).start();
-	    };
+    const animateBars = () => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.parallel([
+            Animated.timing(bar1Height, {
+              toValue: 25,
+              duration: 500,
+              easing: Easing.linear,
+              useNativeDriver: false,
+            }),
+            Animated.timing(bar2Height, {
+              toValue: 50,
+              duration: 500,
+              easing: Easing.linear,
+              useNativeDriver: false,
+            }),
+            Animated.timing(bar3Height, {
+              toValue: 25,
+              duration: 500,
+              easing: Easing.linear,
+              useNativeDriver: false,
+            }),
+          ]),
+          Animated.parallel([
+            Animated.timing(bar1Height, {
+              toValue: 50,
+              duration: 500,
+              easing: Easing.linear,
+              useNativeDriver: false,
+            }),
+            Animated.timing(bar2Height, {
+              toValue: 25,
+              duration: 500,
+              easing: Easing.linear,
+              useNativeDriver: false,
+            }),
+            Animated.timing(bar3Height, {
+              toValue: 50,
+              duration: 500,
+              easing: Easing.linear,
+              useNativeDriver: false,
+            }),
+          ]),
+        ])
+      ).start();
+    };
 
+    useEffect(() => {
 	    animateBars();
-	  }, [bar1Height, bar2Height, bar3Height]);
+	}, [bar1Height, bar2Height, bar3Height]);
 
     const addSongToCurrentSpaceQueue = async() => {
     	setLoading(true);
