@@ -48,7 +48,7 @@
 4. Start streaming music or videos in sync with others.
 5. Use the chat feature to communicate while listening or watching together.
 
-## Technology Used
+## Technologies Used
 
 1. **React Native**: For building the mobile app.
 2. **Node.js**: Backend server.
