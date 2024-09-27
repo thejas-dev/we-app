@@ -1,11 +1,13 @@
 import { io } from 'socket.io-client';
 
-const server = "http://192.168.1.6:3333";
+const server = "http://192.168.109.96:3333"
+// "https://weapp-server.onrender.com"
+// "https://weapp-server.vercel.app";
 
 export const socket = io(server, {
     withCredentials: true,
     extraHeaders: {
-        "Access-Control-Allow-Origin": "http://192.168.1.6:3000",
+        "Access-Control-Allow-Origin": "*",
         "my-custom-header": "abcd"
     },
     reconnection: true,             // Enable reconnection

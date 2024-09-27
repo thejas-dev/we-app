@@ -114,7 +114,7 @@ export default function appNavigation() {
         // Handle the error, e.g., show a notification, log it, or perform other actions
         console.log('An error occurred:', error);
         if(error?.code === 'android-io-network-connection-failed'){
-            if((queue[0].url === currentSongInfo?.url) && queue.length > 1){
+            if(queue.length > 1 && (queue[0].url === currentSongInfo?.url)){
                 playSongFromQueue(queue[1]);
                 let queueData = [...queue];
                 queueData.shift();

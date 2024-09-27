@@ -1,4 +1,7 @@
-export const host = "http://192.168.1.6:3333"
+export const host = "https://weapp-server.vercel.app"
+// "http://192.168.1.4:3333"; 
+// "https://weapp-server.onrender.com" 
+// "http://192.168.1.3:3333"; 
 
 
 export const registerRoute = `${host}/api/auth/register`;

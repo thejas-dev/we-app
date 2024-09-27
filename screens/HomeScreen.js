@@ -191,18 +191,11 @@ export default function HomeScreen({
 	}
 
 	const getSongs = async() => {
+		let granted = ""; 
 		try {
-		    const granted = await PermissionsAndroid.request(
-		      PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
-		      {
-		        title: 'Audio Files Read Permission',
-		        message:
-		          'Audio Files Read Permission Required ' +
-		          'to Play Songs From Local',
-		        buttonNeutral: 'Ask Me Later',
-		        buttonNegative: 'Cancel',
-		        buttonPositive: 'OK',
-		      },
+		    granted = await PermissionsAndroid.request(
+		      // PermissionsAndroid.PERMISSIONS.READ_MEDIA_AUDIO,
+		      PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
 		    );
 		    console.log(granted)
 		    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
@@ -214,16 +207,18 @@ export default function HomeScreen({
 		    console.warn(err);
 		}
 		
-		const songsOrError = await getAll({
-		    limit: 20,
-		    offset: 0,
-		    coverQuality: 30,
-		    minSongDuration: 1000,
-		    sortBy: SortSongFields.TITLE,
-		    sortOrder: SortSongOrder.DESC,
-		});
-		if(localSongs.length<1){
-			setLocalSongs(songsOrError)
+		if(granted === PermissionsAndroid.RESULTS.GRANTED){
+			const songsOrError = await getAll({
+			    limit: 100,
+			    offset: 0,
+			    coverQuality: 30,
+			    minSongDuration: 1000,
+			    sortBy: SortSongFields.TITLE,
+			    sortOrder: SortSongOrder.DESC,
+			});
+			if(localSongs.length<1){
+				setLocalSongs(songsOrError)
+			}
 		}
 	}
 

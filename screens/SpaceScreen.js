@@ -179,7 +179,7 @@ export default function SpaceScreen({
 	}
 
 	useEffect(()=>{
-		if(openQueueTab) checkQueue();
+		if(openQueueTab) checkQueue(currentSpace?.code);
 	},[openQueueTab])
 
 	useEffect(()=>{
@@ -223,6 +223,7 @@ export default function SpaceScreen({
 	useEffect(()=>{
 		if(socket){
       socket.on('number-of-users-in-room',({numClients,userIds})=>{
+      		console.log(numClients);
           setNumberOfUsers(numClients);
           setUsersInSpace(userIds);
       })

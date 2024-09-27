@@ -5,9 +5,7 @@ import {newUserDataState} from '../atoms/userAtom';
 import {useState,useEffect,useRef} from 'react';
 
 
-export default function NewUserAlert({
-
-}) {
+export default function NewUserAlert() {
 
 	const [newUserData,setNewUserData] = useRecoilState(newUserDataState);
 	const slideAnim = useRef(new Animated.Value(500)).current;

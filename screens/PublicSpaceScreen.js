@@ -45,6 +45,7 @@ export default function HomeScreen({navigation}) {
 
 	const fetchSpaces = async() => {
 		const {data} = await axios.get(getAllPublicSpace);
+		console.log(data)
 		setSpaceList([...data.space]);
 	}
 

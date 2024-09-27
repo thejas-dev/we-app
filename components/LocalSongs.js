@@ -83,7 +83,7 @@ export default function LocalSongs({
 		RNFS.uploadFiles({
             toUrl: `${host}/uploadAudio?id=${generateRandom(10)}&filename=${file.title}`,
             files: [
-            	{ name: file?.title, filename:file?.title, filepath: file.url, filetype: "audio/mp3" }
+            	{ name: 'file', filename:file?.title, filepath: file.url, filetype: "audio/mp3" }
             ],
             method: "POST",
             headers: { Accept: "application/json" },
@@ -220,6 +220,14 @@ export default function LocalSongs({
 				        />
 					</View>
 				}
+				{
+					localSongs.length < 1 &&
+					<View className="mx-auto mt-[40px]" >
+						<Text className="text-gray-300 text-xl" >
+							Loading...
+						</Text>
+					</View>
+				}
 
 				<View className="w-full rounded-full h-[1px]"/>
 					
@@ -237,7 +245,7 @@ export default function LocalSongs({
 							}}>
 								<View className="relative rounded-xl overflow-hidden">
 									{
-										currentSongInfo?.url === item?.url &&
+										currentSongInfo && currentSongInfo?.url === item?.url &&
 										<View className="absolute top-0 z-50 left-0 h-full w-full flex items-center 
 										justify-center bg-black/60">
 											<View style={{opacity: 0.7}}

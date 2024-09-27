@@ -1,79 +1,88 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# WE App - Collaborative Media Platform
 
-# Getting Started
+## Table of Contents
+- [Introduction](#introduction)
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Technologies Used](#technologies-used)
+- [API Integration](#api-integration)
+- [Screenshots](#screenshots)
+- [Contributing](#contributing)
+- [License](#license)
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+## Introduction
+**WE App** is a collaborative media platform that allows multiple users to listen to songs and watch videos simultaneously in sync. Users can create public or private spaces and invite others to join, with unlimited participants supported in each space.
 
-## Step 1: Start the Metro Server
+## Features
+- **Synchronized Playback**: Listen to music or watch videos with friends in real-time.
+- **Public and Private Spaces**: Create spaces to share with friends or the public.
+- **Unlimited Users**: No limit to the number of users in a space.
+- **YouTube API Integration**: Stream media using YouTube’s powerful API.
+- **Real-time Chat**: Chat with others while watching or listening together.
+- **Profile Customization**: Users can upload their profile picture and customize their presence.
+  
+## Installation
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/yourusername/we-app.git
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
 
-To start Metro, run the following command from the _root_ of your React Native project:
+2. Install the dependencies:
+   ```bash
+    cd we-app
+    npm install
 
-```bash
-# using npm
-npm start
+3. Set up environment variables for the backend, including API keys (YouTube, ImageKit, etc.)
 
-# OR using Yarn
-yarn start
-```
+4. Start the development server:
+    ```bash
+    npm start
+    ```
 
-## Step 2: Start your Application
+## Usage
 
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
+1. Open the app and sign up or log in.
+2. Create a public or private space.
+3. Invite users or let them join via the unique code displayed in space.
+4. Start streaming music or videos in sync with others.
+5. Use the chat feature to communicate while listening or watching together.
 
-### For Android
+## Technology Used
 
-```bash
-# using npm
-npm run android
+1. **React Native**: For building the mobile app.
+2. **Node.js**: Backend server.
+3. **Express.js**: REST API development.
+4. **Socket.io**: Real-time communication and synchronization.
+5. **YouTube API**: For media streaming.
+6. **ImageKit**: For handling media uploads and storage.
+7. **Multer**: For handling file uploads on the backend.
+8. ...
 
-# OR using Yarn
-yarn android
-```
 
-### For iOS
+## API Integration
+### YouTube API
+The app integrates with the YouTube API for streaming videos and music. The YouTube API allows fetching trending videos, specific playlists, or user searches for real-time playback.
 
-```bash
-# using npm
-npm run ios
+### ImageKit
+ImageKit is used for storing profile pictures and uploaded songs, allowing fast and secure content delivery via CDN.
 
-# OR using Yarn
-yarn ios
-```
+## Screenshots
+<div style="display:flex; flex-wrap:wrap; justify-content:space-around;row-gap:10px">
+    <img src="" alt="Login Screen" style="width:48%">
+    <img src="" alt="Register Screen" style="width:48%">
+    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_9FH7ctv7v" alt="Home Screen" style="width:48%">
+    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_GzOsT3p891" alt="Home Screen" style="width:48%">
+    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_wWPq17qZL" alt="Home Screen" style="width:48%">
+    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_KnMK5Nmum" alt="Home Screen" style="width:48%">
+    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_YVSrxyF0U" alt="Home Screen" style="width:48%">
+    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_zNrq7CKPBD" alt="Home Screen" style="width:48%">
+    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_9oemLp_JMl" alt="Home Screen" style="width:48%">
+    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_kEniPymAb" alt="Home Screen" style="width:48%">
+</div> 
 
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
+## Contributing
+Contributions are welcome! Please fork the repository and submit a pull request.
 
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
-
-## Step 3: Modifying your App
-
-Now that you have successfully run the app, let's modify it.
-
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
-
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+## License
+This project is licensed under the MIT License.
