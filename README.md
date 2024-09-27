@@ -68,7 +68,7 @@ The app integrates with the YouTube API for streaming videos and music. The YouT
 ImageKit is used for storing profile pictures and uploaded songs, allowing fast and secure content delivery via CDN.
 
 ## Screenshots
-<div style="display:flex; flex-wrap:wrap; width: 100%; justify-content:space-around;row-gap:10px">
+<div style="display:flex; flex-wrap:wrap; width: 100%; background-color: white; justify-content:space-around;row-gap:10px">
     <img src="" alt="Login Screen" style="width:45%">
     <img src="" alt="Register Screen" style="width:45%">
     <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_9FH7ctv7v" alt="Home Screen" style="width:45%">
