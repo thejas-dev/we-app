@@ -69,16 +69,16 @@ ImageKit is used for storing profile pictures and uploaded songs, allowing fast 
 
 ## Screenshots
 <div style="display:flex; flex-wrap:wrap; justify-content:space-around;row-gap:10px">
-    <img src="" alt="Login Screen" style="width:48%">
-    <img src="" alt="Register Screen" style="width:48%">
-    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_9FH7ctv7v" alt="Home Screen" style="width:48%">
-    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_GzOsT3p891" alt="Home Screen" style="width:48%">
-    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_wWPq17qZL" alt="Home Screen" style="width:48%">
-    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_KnMK5Nmum" alt="Home Screen" style="width:48%">
-    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_YVSrxyF0U" alt="Home Screen" style="width:48%">
-    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_zNrq7CKPBD" alt="Home Screen" style="width:48%">
-    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_9oemLp_JMl" alt="Home Screen" style="width:48%">
-    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_kEniPymAb" alt="Home Screen" style="width:48%">
+    <img src="" alt="Login Screen" style="width:45%">
+    <img src="" alt="Register Screen" style="width:45%">
+    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_9FH7ctv7v" alt="Home Screen" style="width:45%">
+    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_GzOsT3p891" alt="Home Screen" style="width:45%">
+    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_wWPq17qZL" alt="Home Screen" style="width:45%">
+    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_KnMK5Nmum" alt="Home Screen" style="width:45%">
+    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_YVSrxyF0U" alt="Home Screen" style="width:45%">
+    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_zNrq7CKPBD" alt="Home Screen" style="width:45%">
+    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_9oemLp_JMl" alt="Home Screen" style="width:45%">
+    <img src="https://ik.imagekit.io/d3kzbpbila/thejashari_kEniPymAb" alt="Home Screen" style="width:45%">
 </div> 
 
 ## Contributing
