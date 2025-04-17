@@ -5,71 +5,36 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon2 from 'react-native-vector-icons/Fontisto';
 import Icon3 from 'react-native-vector-icons/FontAwesome';
 import {useState,useEffect} from 'react';
-import {registerRoute,login} from '../utils/ApiRoutes';
+import {registerRoute,login, getUserDetails} from '../utils/ApiRoutes';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useRecoilState} from 'recoil'
-import {currentUserState} from '../atoms/userAtom';
+import {accessTokenState, currentUserState} from '../atoms/userAtom';
 import {particleImage3,image,illustration,googleImage,illustration2,
 	particleImage,particleImage2} from '../utils/imageEncoded';
+import StorageConstants from '../utils/storageConstants';
+import axiosInstance from '../utils/axiosInstance';
+import { getAuthTokens, setAuthTokens } from '../utils/helpers/authHelpers';
 
 export default function LoginScreen2({
 	navigation
 }) {
-	const [show,setShow] = useState(false);
 	const [register,setRegister] = useState(false);
-	const [showConfirm,setShowConfirm] = useState(false);
 	const [email,setEmail] = useState('');
 	const [name,setName] = useState('');
 	const [password,setPassword] = useState('');
-	const [confirmPassword,setConfirmPassword] = useState('');
 	const [emailInvalid,setEmailInvalid] = useState('');
 	const [showInfoBox,setShowInfoBox] = useState('');
 	const [currentUser,setCurrentUser] = useRecoilState(currentUserState);
+	const [accessToken,setAccessToken] = useRecoilState(accessTokenState);
 	const [loading,setLoading] = useState(false);
 	const [showFeatureNotAvailable,setShowFeatureNotAvailable] = useState(false);
+	const [errorMessage,setErrorMessage] = useState('');
 
 	const fetchData = async() => {
-		console.log("ran")
-		const data = await AsyncStorage.getItem("Rplayer-user-session");
-		const passData = await AsyncStorage.getItem("Rplayer-user-password");
-		const parsed = JSON.parse(data);
-		const passParsed = JSON.parse(passData);
-
-		if(parsed && passParsed){
-			loginWithSessionData(parsed.email,passParsed.password);
-		}
-		console.log(parsed)
-	}
-
-	const loginWithSessionData = async(email,password) => {
-		if (/@gmail\.com$/.test(email)){
-			setLoading(true);
-			const {data} = await axios.post(login,{
-				email,password
-			})
-			if(data.status){
-				const userDataForSession = {
-					email,
-					password
-				}
-				await AsyncStorage.setItem("Rplayer-user-session",JSON.stringify(data?.user))
-				await AsyncStorage.setItem("Rplayer-user-password",JSON.stringify({password:password}));
-				setCurrentUser(data?.user);
-				navigation.navigate("Home");
-				setLoading(false);
-			}else{
-				setLoading(false);
-				// console.log(data)
-				setShowInfoBox(true);
-				setTimeout(()=>{setShowInfoBox(false)},4000)
-			}
-		}else{
-			setLoading(false)
-			setEmailInvalid(true);
-			setTimeout(()=>{
-				setEmailInvalid(false);					
-			},4000)
+		const {accessToken} = await getAuthTokens();
+		if(accessToken){
+			getUserDetailsFunc();
 		}
 	}
 
@@ -77,31 +42,56 @@ export default function LoginScreen2({
 		fetchData()
 	},[])
 
+	const getUserDetailsFunc = async() => {
+		setLoading(true);
+		try {
+			const {data} = await axiosInstance.get(getUserDetails);
+			if(data.success){
+				setCurrentUser(data?.user);
+				setLoading(false);
+				navigation.navigate("Home");
+			}else{
+				setLoading(false)
+				setShowInfoBox(true);
+				setErrorMessage(data.message);
+				setTimeout(()=>{
+					setEmailInvalid(false);					
+					setErrorMessage('');
+				},4000)
+			}
+		} catch (error) {
+			console.log(error);
+		}
+		
+	}
+
 	const loginNow = async() => {
 		if(register){
 			if (/@gmail\.com$/.test(email)){
-				setLoading(true)
-				const {data} = await axios.post(registerRoute,{
-					name:name,
-					username:name,
-					password,
-					email,
-					image:''
-				})
-				if(data?.status){
-					const userDataForSession = {
+				try {
+					setLoading(true)
+					const {data} = await axiosInstance.post(registerRoute,{
+						name:name,
+						username:name,
+						password,
 						email,
-						password
+					})
+					console.log(data);
+					if(data.success == true){
+						setAccessToken(data.accessToken);
+						await setAuthTokens(data.accessToken,data.refreshToken);
+						getUserDetailsFunc();
+					}else{
+						throw new Error("Error in API response");
 					}
-					await AsyncStorage.setItem("Rplayer-user-session",JSON.stringify(data?.user));
-					await AsyncStorage.setItem("Rplayer-user-password",JSON.stringify({password:password}));
-					setCurrentUser(data?.user);
-					setLoading(false);
-					navigation.navigate("Home")
-				}else{
+				} catch (error) {
+					setErrorMessage(error.response.data.message);
 					setLoading(false)
 					setShowInfoBox(true)
-					setTimeout(()=>{setShowInfoBox(false)},4000)
+					setTimeout(()=>{
+						setShowInfoBox(false);
+						setErrorMessage('');
+					},4000)
 				}
 			}else{
 				setLoading(false)
@@ -113,26 +103,39 @@ export default function LoginScreen2({
 
 		}else{
 			if (/@gmail\.com$/.test(email)){
-				setLoading(true);
-				const {data} = await axios.post(login,{
-					email,password
-				})
-				if(data.status){
-					const userDataForSession = {
-						email,
-						password
+				try {
+					setLoading(true);
+					const {data} = await axiosInstance.post(login,{
+						email,password
+					})
+					if(data.success){
+						await AsyncStorage.setItem(
+							StorageConstants.userTokens,
+							JSON.stringify({
+								accessToken: data.accessToken,
+								refreshToken: data.refreshToken
+							})
+						);
+						getUserDetailsFunc();
+					}else{
+						setLoading(false);
+						setShowInfoBox(true);
+						setErrorMessage(data.message);
+						setTimeout(()=>{
+							setShowInfoBox(false);
+							setErrorMessage('');
+						},4000)
 					}
-					await AsyncStorage.setItem("Rplayer-user-session",JSON.stringify(data?.user));
-					await AsyncStorage.setItem("Rplayer-user-password",JSON.stringify({password:password}));
-					setCurrentUser(data?.user);
-					navigation.navigate("Home");
+				} catch (error) {
+					setErrorMessage(error.response.data.message);
 					setLoading(false);
-				}else{
-					setLoading(false);
-					// console.log(data)
 					setShowInfoBox(true);
-					setTimeout(()=>{setShowInfoBox(false)},4000)
+					setTimeout(()=>{
+						setShowInfoBox(false);
+						setErrorMessage('')
+					},4000)
 				}
+				
 			}else{
 				setLoading(false)
 				setEmailInvalid(true);
@@ -154,7 +157,7 @@ export default function LoginScreen2({
 		<View className="h-full w-full relative bg-gray-900 justify-end" >
 			<View className={`absolute z-50 flex ${showFeatureNotAvailable ? 'bottom-5' : '-bottom-[100%]'} items-center justify-center w-full`}>
 				<View className="px-4 bg-black/60 py-2 rounded-lg">
-					<Text className="text-[15px]" >
+					<Text className="text-[15px] text-white" >
 						Feature Currently Not Available
 					</Text>
 				</View>
@@ -189,9 +192,12 @@ export default function LoginScreen2({
         }} style={styles.centeredView}>
           <View className="bg-gray-900/50 p-5 py-3 rounded-lg border-[1px] 
           border-gray-200/50 border-solid" >
-            <Text style={{fontFamily:'Poppins-Medium'}} className="text-white text-lg">
+            <Text style={{fontFamily:'Poppins-Medium', textAlign:'center'}} className="text-white text-lg">
             {
-            	register ?
+            	errorMessage ? 
+				errorMessage 
+				:
+				register ?
             	'Something went wrong!'
             	:
             	'Email ID/Password incorrect'

@@ -5,6 +5,7 @@ import {getSpaceWithCode,updateInSpace} from '../utils/ApiRoutes';
 import {currentUserState} from '../atoms/userAtom';
 import {useRecoilState} from 'recoil';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axiosInstance from '../utils/axiosInstance';
 
 
 export default function PublicSpaceCardHome({
@@ -31,8 +32,9 @@ export default function PublicSpaceCardHome({
 				saveCurrentSpaceInLocal(data?.space);
 
 				if(currentUser?.inSpace !== data?.space?.code){
-					const data2 = await axios.post(`${updateInSpace}/${currentUser?._id}`,{
-						spaceCode:data?.space?.code
+					const data2 = await axiosInstance.post(updateInSpace,{
+						spaceCode:data?.space?.code,
+						userId: currentUser?._id
 					})
 					if(data2?.data?.status){
 						setCurrentUser(data2?.data?.user);

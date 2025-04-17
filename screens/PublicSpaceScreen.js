@@ -5,7 +5,7 @@ import {View,StatusBar,Image,Text,FlatList,
 import NavbarPublicSpace from '../components/NavbarPublicSpace';
 import {SafeAreaView} from 'react-native-safe-area-context'
 import {useState,useEffect} from 'react';
-import {createSpace,getSpaceWithCode,updateInSpace,
+import {createSpace,getSpaceWithCode,
 	getAllPublicSpace,getUserById} from '../utils/ApiRoutes';
 import {useRecoilState} from 'recoil'
 import {currentUserState,currentSpaceState,currentSongInfoState} from '../atoms/userAtom';

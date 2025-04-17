@@ -10,12 +10,15 @@ import {useRecoilState} from 'recoil';
 import {currentUserState,currentSpaceState} from '../atoms/userAtom';
 import {useState,useEffect,useCallback} from 'react';
 import {getSpaceWithCode,updateUserName,
-	profileImageUploadUrl} from '../utils/ApiRoutes';
+	profileImageUploadUrl,
+	logoutUser} from '../utils/ApiRoutes';
 import SettingSpaceCard from '../components/SettingSpaceCard';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ProfileUploadComponent from '../components/ProfileUploadComponent';
 import {profileImage,particleImage2,particleImage3,musicImage} from '../utils/imageEncoded'
+import { clearTokens, getAuthTokens } from '../utils/helpers/authHelpers';
+import axiosInstance from '../utils/axiosInstance';
 
 export default function SettingScreen({
 	navigation
@@ -62,21 +65,41 @@ export default function SettingScreen({
 		}
 	},[currentUser])
 
+	const logoutUserFunc = () => {
+		return new Promise(async(resolve, _) =>{
+			try {
+				const {refreshToken} = await getAuthTokens();
+                const {data} = await axiosInstance.post(logoutUser,{
+					refreshToken
+				});
+				if(data.success == true){
+					resolve(true);
+				}else{
+					resolve(false);
+				}
+            } catch (error) {
+				console.log(error);
+                resolve(false);
+            }
+		})
+	}
+
 	const logOutFunc = async() => {
 		if(!currentSpace){
-			await AsyncStorage.removeItem("Rplayer-user-session");
-			await AsyncStorage.removeItem("Rplayer-currentSpace");
-			AsyncStorage.getItem("Rplayer-user-session");
-			navigation.navigate("Login");
+			const result = await logoutUserFunc();
+			if(result == true){
+				await clearTokens();
+				navigation.navigate("Login");
+			}
 		}
 	}
 
 	const saveName = async(newName) => {
-		const {data} = await axios.post(updateUserName,{
+		const {data} = await axiosInstance.post(updateUserName,{
 			name:newName,
-			id:currentUser?._id
+			userId:currentUser?._id
 		})
-		if(data?.status && data?.user){
+		if(data?.success && data?.user){
 			setCurrentUser(data.user);
 		}
 	}

@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 
-const server = "http://192.168.109.96:3333"
+const server = "http://192.168.1.6:3333"
 // "https://weapp-server.onrender.com"
 // "https://weapp-server.vercel.app";
 

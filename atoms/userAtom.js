@@ -81,3 +81,8 @@ export const newMessageState = atom({
 	key:'newMessageState',
 	default:''
 })
+
+export const accessTokenState = atom({
+	key:'accessTokenState',
+    default:''
+})

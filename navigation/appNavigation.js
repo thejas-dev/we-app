@@ -3,7 +3,7 @@ import React, { useState, useCallback, useRef, useEffect }  from 'react';
 import {Button, View, Alert, AppState  } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import PublicSpaceScreen from '../screens/PublicSpaceScreen';
-import LoginScreen2 from '../screens/LoginScreen2';
+import LoginScreen2 from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
 import SpaceScreen from '../screens/SpaceScreen';
 import SettingScreen from '../screens/SettingScreen';
@@ -17,11 +17,14 @@ import {currentUserState,currentSongInfoState,
     numberOfUsersState,queueState,youtubePlayerState,
     globalPlayerRefState,songPlayingState,newMessageState,
     playingState,chatsState} from '../atoms/userAtom';
-import {getSpaceWithCode,getQueueOfSpace} from '../utils/ApiRoutes';
+import {getSpaceWithCode,getQueueOfSpace, getUserDetails} from '../utils/ApiRoutes';
 import TrackPlayer, { Capability, State, Event } from 'react-native-track-player';
 import axios from 'axios';
 import BackgroundTimer from 'react-native-background-timer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getAuthTokens, getUserSession, setAuthTokens, setUserSession } from '../utils/helpers/authHelpers';
+import axiosInstance from '../utils/axiosInstance';
+import StorageConstants from '../utils/storageConstants';
 
 
 const Stack = createNativeStackNavigator();
@@ -618,22 +621,30 @@ export default function appNavigation() {
         
     }
 
-    const saveUserData = async() => {
-        await AsyncStorage.setItem("Rplayer-user-session",JSON.stringify(currentUser));
-    }
-
     useEffect(()=>{
         if(currentUser){
-            saveUserData();
+            setUserSession(currentUser);
         }
     },[currentUser])
     
     const checkAuth = async() => {
-        if(AsyncStorage.getItem("Rplayer-user-session")){
-            const data = await AsyncStorage.getItem("Rplayer-user-session");
-            const parsedData = JSON.parse(data);
-            setCurrentUser(parsedData);
+        if(AsyncStorage.getItem(StorageConstants.userSession)){
+            const user = getUserSession();
+            setCurrentUser(user);
         }
+        
+        const {accessToken} = await getAuthTokens();
+        if(accessToken){
+            const {data} = await axiosInstance.get(getUserDetails);
+            if(data.success){
+                setCurrentUser(data.user);
+            }else{
+                navigationRef.current.navigate('Login');
+            }
+        }else{
+            navigationRef.current.navigate('Login');
+        }
+        
     }
 
     useEffect(()=>{

@@ -25,6 +25,7 @@ import TrackPlayer, { Capability, State } from 'react-native-track-player';
 import {socket} from '../services/socket';
 import {particleImage3 as particleImage2, particleImage2 as particleImage3, musicImage} 
 	from '../utils/imageEncoded';
+import axiosInstance from '../utils/axiosInstance';
 
 const loadingTemp = false;
 
@@ -72,43 +73,54 @@ export default function HomeScreen({
 	};
 
 	const createSpaceFunc = async() => {
-		if(spaceName?.length > 0 && currentUser && !currentSpace){
-			setLoading(true);
+		try {
+			if(spaceName?.length > 0 && currentUser && !currentSpace){
+				setLoading(true);
 
-			const code = await generateRandomId(5);
-			let userData = {
-				name:currentUser?.name,
-				_id:currentUser?._id,
-			}
-			const users = [userData];
-			const {data} = await axios.post(createSpace,{
-				ownerImage:currentUser.image,
-				ownerId:currentUser?._id,
-				isPrivate:!creatingPublicSpace,
-				owner:currentUser.name,
-				spaceName:spaceName,
-				code,
-				users
-			})
-			if(data.status){
-				const data2 = await axios.post(`${updateInSpace}/${currentUser?._id}`,{
-					spaceCode:data?.space?.code
-				})
-				if(data2?.data?.status){
-					setCurrentUser(data2?.data?.user);
-					setCurrentSpace(data?.space);
-					saveCurrentSpaceInLocal(data?.space);
-					navigation.navigate("Space");
+				const code = await generateRandomId(5);
+				let userData = {
+					name:currentUser?.name,
+					_id:currentUser?._id,
 				}
-				// setLoading(true);
-				// router.push(`/space/${data?.space?.code}`);
+				const users = [userData];
+				const {data} = await axios.post(createSpace,{
+					ownerImage:currentUser.image,
+					ownerId:currentUser?._id,
+					isPrivate:!creatingPublicSpace,
+					owner:currentUser.name,
+					spaceName:spaceName,
+					code,
+					users
+				})
+				if(data.status){
+					const data2 = await axiosInstance.post(updateInSpace,{
+						spaceCode:data?.space?.code,
+						userId: currentUser?._id
+					})
+					if(data2?.data?.success){
+						setCurrentUser(data2?.data?.user);
+						setCurrentSpace(data?.space);
+						saveCurrentSpaceInLocal(data?.space);
+						navigation.navigate("Space");
+					}else{
+						setLoading(false);
+						Alert.alert(data2?.data?.message);
+					}
+					// setLoading(true);
+					// router.push(`/space/${data?.space?.code}`);
+				}else{
+					Alert.alert(data2?.data?.message);
+					setLoading(false);
+				}
 			}else{
-				setLoading(false);
+				if(currentSpace)
+				Alert.alert("Leave the current space");
 			}
-		}else{
-			if(currentSpace)
-			Alert.alert("Leave the current space");
+		} catch (error) {
+			console.log(error);
+			setLoading(false);
 		}
+		
 	}
 
 	const handleTrendingResponse = async(res) => {
@@ -194,7 +206,7 @@ export default function HomeScreen({
 		let granted = ""; 
 		try {
 		    granted = await PermissionsAndroid.request(
-		      // PermissionsAndroid.PERMISSIONS.READ_MEDIA_AUDIO,
+		      PermissionsAndroid.PERMISSIONS.READ_MEDIA_AUDIO,
 		      PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
 		    );
 		    console.log(granted)
@@ -270,8 +282,9 @@ export default function HomeScreen({
 			setJoinWithCodeOpen(false);
 
 			if(currentUser?.inSpace !== data?.space?.code){
-				const data2 = await axios.post(`${updateInSpace}/${currentUser?._id}`,{
-					spaceCode:data?.space?.code
+				const data2 = await axiosInstance.post(updateInSpace,{
+					spaceCode:data?.space?.code,
+					userId: currentUser?._id
 				})
 				if(data2?.data?.status){
 					setCurrentUser(data2?.data?.user);

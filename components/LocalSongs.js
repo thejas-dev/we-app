@@ -2,13 +2,14 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import {View,Text,Modal,ScrollView,FlatList,Pressable,Image,
 Animated,Easing} from 'react-native';
 import {useRef,useEffect,useState} from 'react';
-import {host} from '../utils/ApiRoutes'
+import {host, host2} from '../utils/ApiRoutes'
 import RNFS from "react-native-fs";
 import LinearGradient from 'react-native-linear-gradient';
 import {useRecoilState} from 'recoil';
 import {currentUserState} from '../atoms/userAtom'
 import {updateFavSong} from '../utils/ApiRoutes';
 import axios from 'axios';
+import axiosInstance from '../utils/axiosInstance';
 
 export default function LocalSongs({
 	TrackPlayer,Capability,State,openLocalSongs,
@@ -81,7 +82,7 @@ export default function LocalSongs({
 	const uploadSong = async(file) => {
 		if(!currentUser) return;
 		RNFS.uploadFiles({
-            toUrl: `${host}/uploadAudio?id=${generateRandom(10)}&filename=${file.title}`,
+            toUrl: `${host2}/uploadAudio?id=${generateRandom(10)}&filename=${file.title}`,
             files: [
             	{ name: 'file', filename:file?.title, filepath: file.url, filetype: "audio/mp3" }
             ],
@@ -117,10 +118,10 @@ export default function LocalSongs({
 	        }
 	        let tempSongs = currentUser?.favSong?.length > 0 ? [...currentUser?.favSong] : [];
 	        tempSongs = [...tempSongs,track1];
-	        const data2 = await axios.post(updateFavSong,{favSong:tempSongs,id:currentUser?._id});
-	        if(data2?.data?.status){
-	        	setCurrentUser(data2?.data?.user);
-	        	console.log(data2?.data?.user);
+	        const result = await axiosInstance.post(updateFavSong,{favSong:tempSongs,userId:currentUser?._id});
+	        if(result?.data?.success){
+	        	setCurrentUser(result?.data?.user);
+				setOpenLocalSongs(false);
 	        }
 
             setUploading(false);

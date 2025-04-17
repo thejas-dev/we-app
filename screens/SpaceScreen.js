@@ -28,6 +28,7 @@ import YoutubePlayer from 'react-native-youtube-iframe';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {particleImage2 as particleImage3,particleImage3 as particleImage2,musicImage} 
 	from '../utils/imageEncoded';
+import axiosInstance from '../utils/axiosInstance';
 
 
 export default function SpaceScreen({
@@ -157,7 +158,6 @@ export default function SpaceScreen({
 		          spaceCode: currentSpace.code,
 		          userId:currentUser?._id
 		        })
-		        console.log("I dhan ran")
 	        }
         }else{
 	        setYoutubePlayer('');
@@ -222,28 +222,28 @@ export default function SpaceScreen({
 
 	useEffect(()=>{
 		if(socket){
-      socket.on('number-of-users-in-room',({numClients,userIds})=>{
-      		console.log(numClients);
-          setNumberOfUsers(numClients);
-          setUsersInSpace(userIds);
-      })
-      socket.on("update-queue",({queue})=>{
-      	setQueue(queue);
-      })
-      socket.on("get-youtube-position",async({userId})=>{
-      	console.log("received",youtubePlayer,playing,currentUser._id,currentSpace?.users[0]?._id);
-          if(youtubePlayer && playing && (currentUser._id === currentSpace?.users[0]?._id)){
-              const seekTo = await playerRef?.current?.getCurrentTime()
-      		if(seekTo){
-        		console.log("sent",seekTo);
-                socket.emit("sending-youtube-position",{
-                    userId,
-                    seekTo,
-                    timestamp:Date.now()
-                })	
-      		}
-          }
-      })
+			socket.on('number-of-users-in-room',({numClients,userIds})=>{
+				console.log(numClients);
+				setNumberOfUsers(numClients);
+				setUsersInSpace(userIds);
+			})
+			socket.on("update-queue",({queue})=>{
+				setQueue(queue);
+			})
+			socket.on("get-youtube-position",async({userId})=>{
+				console.log("received",youtubePlayer,playing,currentUser._id,currentSpace?.users[0]?._id);
+				if(youtubePlayer && playing && (currentUser._id === currentSpace?.users[0]?._id)){
+					const seekTo = await playerRef?.current?.getCurrentTime()
+					if(seekTo){
+						console.log("sent",seekTo);
+						socket.emit("sending-youtube-position",{
+							userId,
+							seekTo,
+							timestamp:Date.now()
+						})	
+					}
+				}
+			})
 		}
 
 		return () => {
@@ -258,7 +258,8 @@ export default function SpaceScreen({
 	}
 
 	const removeInSpaceCurrentUser = async(code) => {
-		const {data} = await axios.post(`${updateInSpace}/${currentUser?._id}`,{
+		const {data} = await axiosInstance.post(updateInSpace,{
+			userId:currentUser?._id,
 			spaceCode:''
 		})
 		setCurrentUser(data?.user);

@@ -4,6 +4,7 @@ import {useState,useEffect} from 'react';
 import axios from 'axios';
 import {getUsersById} from '../utils/ApiRoutes';
 import {profileImage} from '../utils/imageEncoded';
+import axiosInstance from '../utils/axiosInstance';
 
 export default function UserListComponent({
 	usersInSpace,setOpenUsersTab,openUsersTab
@@ -11,9 +12,9 @@ export default function UserListComponent({
 	const [users,setUsers] = useState([]);
 
 	const fetchUsers = async(id) => {
-		const {data} = await axios.post(getUsersById,{id});
-		if(data?.status){
-			setUsers(data?.user);
+		const {data} = await axiosInstance.post(getUsersById,{userIds:id});
+		if(data?.success){
+			setUsers(data?.users);
 		}
 	}
 
